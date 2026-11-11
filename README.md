@@ -1006,35 +1006,146 @@ Responsibilities:
 
 ## 15.4 Architecture Diagram
 
+
+### 15.4 System Architecture Diagram
+
+EMPOWER follows a **single-repository, client-server architecture**. The React frontend communicates with the FastAPI backend through REST APIs. The backend handles authentication, authorization, business logic, database operations, and communication between product modules.
+
 ```mermaid
-flowchart TD
-    A[Users] --> B[React Frontend]
-    B --> C[React Router]
-    C --> D[Axios API Client]
-    D --> E[FastAPI Backend]
+flowchart TB
+    %% User Layer
+    subgraph UL["User Layer"]
+        W["Worker"]
+        E["Employer"]
+        A["Administrator"]
+    end
 
-    E --> F[Authentication and Authorization]
-    E --> G[Business Logic]
-    E --> H[API Routers]
+    %% Frontend Layer
+    subgraph FL["Frontend Layer - React + Vite + Tailwind CSS"]
+        UI["User Interface"]
+        AUTH_UI["Authentication Pages"]
+        WORKER_UI["Worker Dashboard"]
+        EMPLOYER_UI["Employer Dashboard"]
+        ADMIN_UI["Admin Dashboard"]
+        JOB_UI["Job Search and Job Management"]
+        APP_UI["Application Management"]
+        PROFILE_UI["Profile Management"]
+    end
 
-    H --> I[User and Profile Services]
-    H --> J[Job Services]
-    H --> K[Application Services]
-    H --> L[Chat and Review Services]
-    H --> M[Escrow Services]
-    H --> N[Admin Services]
+    %% API Layer
+    subgraph AL["Backend Layer - Python + FastAPI"]
+        API["REST API"]
+        AUTH["Authentication and Authorization"]
+        USER["User and Profile Management"]
+        JOB["Job Management"]
+        APP["Application Management"]
+        CHAT["Chat Module"]
+        REVIEW["Review and Rating Module"]
+        ESCROW["Simulated Escrow Module"]
+        ADMIN["Administration and Moderation"]
+    end
 
-    I --> O[SQLAlchemy ORM]
-    J --> O
-    K --> O
-    L --> O
-    M --> O
-    N --> O
+    %% Data Layer
+    subgraph DL["Data Access Layer"]
+        ORM["SQLAlchemy ORM"]
+        DB_SESSION["Database Session Management"]
+        MIGRATION["Alembic Migrations"]
+    end
 
-    O --> P[(PostgreSQL Database)]
+    %% Database
+    subgraph DB["Database Layer - PostgreSQL"]
+        USERS[("Users")]
+        PROFILES[("Profiles")]
+        JOBS[("Jobs")]
+        APPLICATIONS[("Applications")]
+        CHATS[("Chats")]
+        REVIEWS[("Reviews")]
+        ESCROWS[("Escrow Records")]
+    end
+
+    %% User to Frontend
+    W --> UI
+    E --> UI
+    A --> UI
+
+    %% Frontend Components
+    UI --> AUTH_UI
+    UI --> WORKER_UI
+    UI --> EMPLOYER_UI
+    UI --> ADMIN_UI
+    UI --> JOB_UI
+    UI --> APP_UI
+    UI --> PROFILE_UI
+
+    %% Frontend to Backend
+    AUTH_UI --> API
+    WORKER_UI --> API
+    EMPLOYER_UI --> API
+    ADMIN_UI --> API
+    JOB_UI --> API
+    APP_UI --> API
+    PROFILE_UI --> API
+
+    %% API to Modules
+    API --> AUTH
+    API --> USER
+    API --> JOB
+    API --> APP
+    API --> CHAT
+    API --> REVIEW
+    API --> ESCROW
+    API --> ADMIN
+
+    %% Modules to Data Access
+    AUTH --> ORM
+    USER --> ORM
+    JOB --> ORM
+    APP --> ORM
+    CHAT --> ORM
+    REVIEW --> ORM
+    ESCROW --> ORM
+    ADMIN --> ORM
+
+    ORM --> DB_SESSION
+    DB_SESSION --> DB
+
+    %% Database Entities
+    DB --> USERS
+    DB --> PROFILES
+    DB --> JOBS
+    DB --> APPLICATIONS
+    DB --> CHATS
+    DB --> REVIEWS
+    DB --> ESCROWS
+
+    %% Migration Management
+    MIGRATION -.-> DB
+
+    %% Styling
+    classDef user fill:#e3f2fd,stroke:#1565c0,color:#000;
+    classDef frontend fill:#e8f5e9,stroke:#2e7d32,color:#000;
+    classDef backend fill:#fff3e0,stroke:#ef6c00,color:#000;
+    classDef data fill:#f3e5f5,stroke:#7b1fa2,color:#000;
+    classDef database fill:#fce4ec,stroke:#c2185b,color:#000;
+
+    class W,E,A user;
+    class UI,AUTH_UI,WORKER_UI,EMPLOYER_UI,ADMIN_UI,JOB_UI,APP_UI,PROFILE_UI frontend;
+    class API,AUTH,USER,JOB,APP,CHAT,REVIEW,ESCROW,ADMIN backend;
+    class ORM,DB_SESSION,MIGRATION data;
+    class USERS,PROFILES,JOBS,APPLICATIONS,CHATS,REVIEWS,ESCROWS database;
 ```
 
----
+**Architecture Flow:**
+
+1. **User Layer:** Workers, employers, and administrators access EMPOWER through the web application.
+2. **Frontend Layer:** React renders role-specific interfaces and uses Axios to send HTTP requests to the backend REST APIs.
+3. **Backend Layer:** FastAPI receives requests and routes them to the appropriate module. Authentication, authorization, validation, and business rules are handled at this layer.
+4. **Data Access Layer:** SQLAlchemy manages database operations and SQLAlchemy sessions. Alembic manages database schema migrations.
+5. **Database Layer:** PostgreSQL stores user accounts, profiles, jobs, applications, chat records, reviews, and simulated escrow records.
+
+**Important:** The diagram represents the intended logical architecture of the EMPOWER prototype. Modules such as chat, reviews, escrow, and administration may have placeholder or incomplete functionality depending on the current implementation. The simulated escrow module does not hold or transfer real money.
+```
+
 
 # 16. Database Overview
 
